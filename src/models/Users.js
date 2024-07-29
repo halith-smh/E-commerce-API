@@ -11,6 +11,11 @@ const CartItemSchema = new mongoose.Schema(
         type: String,
         required: [true, "Item name should be present"]
     },
+    price: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     quantity: {
       type: Number,
       required: true,
@@ -37,7 +42,8 @@ const UserSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: [8, "Password must be at least 8 characters long"],
     },
-    cartItem: [CartItemSchema]
+    cartItem: [CartItemSchema],
+    Orders: []
   },
   { timestamps: true }
 );
