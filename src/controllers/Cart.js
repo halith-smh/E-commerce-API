@@ -3,16 +3,11 @@ const { ApiResponse } = require("../utils/ApiResponse");
 
 const addItems = async (req, res) => {
   const { items } = req.body;
-  const userId = req.userId;
+
+  const user = req.user;
 
   try {
-    const user = await Users.findById(userId);
-
-    if (!user) {
-      return res.status(404).send(new ApiResponse(404, null, "User not found"));
-    }
-
-    items.forEach(item => {
+    items.forEach((item) => {
       user.cartItem.push(item);
     });
 
@@ -31,16 +26,54 @@ const addItems = async (req, res) => {
   }
 };
 
-const updateItems = async (req, res) => {};
+const updateItems = async (req, res) => {
+  const { productId, quantity } = req.body;
+  const user = req.user;
 
-const removeItem = async (req, res) => {};
+ try {
+   const index = user.cartItem.findIndex((item) => item.productId === productId);
+   if (index === -1) {
+     return res.status(404).send(new ApiResponse(404, null, "Item not found"));
+   }
+ 
+   user.cartItem[index].quantity = quantity;
+   await user.save();
+ 
+   res
+     .status(200)
+     .send(new ApiResponse(200, user.cartItem, "Cart item quantity updated"));
+ } catch (error) {
+  res.status(500).send("Error occured");
+ }
+};
 
-const viewItems = async (req, res) => {
-  const userId = req.userId;
+const removeItem = async (req, res) => {
+  const { productId } = req.body;
 
   try {
-    const user = await Users.findById(userId);
+    const user = req.user;
 
+    const index = user.cartItem.findIndex(
+      (item) => item.productId === productId
+    );
+    if (index === -1) {
+      return res.status(404).send(new ApiResponse(404, null, "Item not found"));
+    }
+    user.cartItem.splice(index, 1);
+
+    await user.save();
+    res
+      .status(200)
+      .send(new ApiResponse(200, user.cartItem, "Item removed from cart"));
+  } catch (error) {
+    res.status(500).send("Error occured");
+  }
+};
+
+const viewItems = async (req, res) => {
+  const user = req.user;
+
+  try {
     if (!user) {
       return res.status(404).send(new ApiResponse(404, null, "User not found"));
     }
