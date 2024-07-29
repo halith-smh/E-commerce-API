@@ -1,8 +1,8 @@
-const Carts = require("../models/Carts");
+const Users = require("../models/Users");
 const { ApiResponse } = require("../utils/ApiResponse");
 
 const addItems = async (req, res) => {
-  const { items } = req.body; // Expecting an array of cart items
+  const { items } = req.body;
   const userId = req.userId;
 
   try {
@@ -12,16 +12,8 @@ const addItems = async (req, res) => {
       return res.status(404).send(new ApiResponse(404, null, "User not found"));
     }
 
-    // Add new items or update existing items in the user's cart
-    items.forEach((item) => {
-      const index = user.cartItem.findIndex(
-        (cartItem) => cartItem.productId === item.productId
-      );
-      if (index !== -1) {
-        user.cartItem[index].quantity = item.quantity; // Update quantity if item exists
-      } else {
-        user.cartItem.push(item); // Add new item if not exists
-      }
+    items.forEach(item => {
+      user.cartItem.push(item);
     });
 
     await user.save();
